@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VOIDSAFIO</title>
+<meta name="description" content="VOIDSAFIO: servidor de Minecraft estilo permadeath de 21 días. Fase beta. Apoya el proyecto y gana un título en tu nametag.">
+<meta property="og:title" content="VOIDSAFIO">
+<meta property="og:description" content="21 días. Permadeath por diversión. La señal se corrompe.">
+<meta property="og:image" content="fondo.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cellipse cx='8' cy='8' rx='7.5' ry='4.5' fill='%23f2f0e6'/%3E%3Ccircle cx='8' cy='8' r='3' fill='%23000'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+<style>
+/* Layout: escritorio de Windows XP con tema negro (Royale Noir) sobre la colina de hongos y ojos;
+   una ventana de Internet Explorer con un sitio de los 2000 dentro, ventanas hijas por sección y
+   barra de tareas fija abajo. Tema único y oscuro a propósito. */
+:root {
+  color-scheme: dark;
+  --void: #050506;
+  --face: #1b1b1f;
+  --face-hi: #2a2a30;
+  --face-edge: #3c3c44;
+  --paper: #0d0d10;
+  --ink: #dcdcd2;
+  --ink-soft: #9a9a92;
+  --bone: #f2f0e6;
+  --moss: #8fb36a;
+  --moss-dark: #3f5a2a;
+  --glow: #b88cff;
+  --link: #a6e05a;
+  --visited: #c79bff;
+  --bar-hi: #4a4a52;
+  --bar: #18181c;
+  --bar-low: #000;
+  --warn: #f5c400;
+  --blood: #a3170a;
+  --mc-green: #55ff55;
+  --mc-purple: #ff55ff;
+  --mc-red: #ff5555;
+  --font-ui: Tahoma, Verdana, "Segoe UI", Geneva, sans-serif;
+  --font-title: "Trebuchet MS", Tahoma, Verdana, sans-serif;
+  --font-px: "VT323", "Lucida Console", "Courier New", monospace;
+  --font-2000: "Comic Sans MS", "Comic Neue", "Chalkboard SE", cursive;
+  /* cursores clásicos de Windows */
+  --cur-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='30' viewBox='0 0 12 19' shape-rendering='crispEdges'%3E%3Cpath d='M0.5 0.5V16.5L4.5 12.5L7 18.5L9.5 17.5L7 11.5H11.5Z' fill='%23fff' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") 1 1, default;
+  --cur-hand: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='30' viewBox='0 0 17 22' shape-rendering='crispEdges'%3E%3Cpath d='M5.5 0.5H7.5V8.5H9.5V7.5H11.5V8.5H13.5V9.5H14.5V10.5H15.5V17.5L13.5 21.5H5.5L1.5 15.5V13.5H3.5L4.5 14.5V1.5Z' fill='%23fff' stroke='%23000' stroke-width='1'/%3E%3Cpath d='M7.5 8.5V12M9.5 8.5V12M11.5 8.5V12M13.5 9.5V12' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") 7 1, pointer;
+}
+* { box-sizing: border-box; }
+html { cursor: var(--cur-arrow); scroll-behavior: smooth; }
+a, button, .eye, [role="button"] { cursor: var(--cur-hand); }
+body {
+  margin: 0;
+  font: 13px/1.5 var(--font-ui);
+  color: var(--ink);
+  background: var(--void) url("fondo.jpg") center bottom / cover no-repeat fixed;
+  min-height: 100vh;
+}
+.desk {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 20px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 72px;
+}
+.icons { display: flex; flex-direction: column; gap: 18px; padding-top: 6px; }
+.icon {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: var(--bone); text-decoration: none; text-align: center; font-size: 12px;
+  text-shadow: 1px 1px 2px #000, 0 0 6px #000;
+}
+.icon:visited { color: var(--bone); }
+.icon .ico { width: 40px; height: 40px; display: grid; place-items: center; font-size: 26px; filter: grayscale(.6) drop-shadow(0 0 4px #000); }
+.icon:hover span:last-child, .icon:focus-visible span:last-child { background: #2b2b33; outline: 1px dotted var(--bone); }
+
+/* ---------- ventanas (Royale Noir) ---------- */
+.win {
+  background: var(--face);
+  border: 1px solid #000;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 0 0 1px var(--bar-hi), 4px 8px 24px rgba(0,0,0,.7);
+  overflow: hidden;
+  min-width: 0;
+}
+.bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 6px 4px 8px;
+  background: linear-gradient(180deg, var(--bar-hi) 0%, #2a2a30 10%, var(--bar) 50%, var(--bar-low) 100%);
+  color: var(--bone); font: bold 13px var(--font-title);
+  text-shadow: 0 0 6px rgba(184,140,255,.45);
+}
+.bar .t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btns { display: flex; gap: 2px; }
+.btns button {
+  width: 21px; height: 21px; display: grid; place-items: center; padding: 0;
+  border: 1px solid #8a8a92; border-radius: 3px; font: bold 11px var(--font-ui); color: var(--bone);
+  background: linear-gradient(180deg, #55555e, #1d1d22);
+}
+.btns button.x { background: linear-gradient(180deg, #d0745a, #7a1f08); }
+.btns button:focus-visible { outline: 1px dotted var(--bone); outline-offset: 1px; }
+.menu { display: flex; gap: 14px; padding: 2px 8px; border-bottom: 1px solid var(--face-edge); font-size: 12px; color: var(--ink-soft); }
+.menu span::first-letter { text-decoration: underline; }
+.addr {
+  display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+  border-bottom: 1px solid var(--face-edge); font-size: 12px; color: var(--ink-soft);
+}
+.addr .field {
+  flex: 1; min-width: 0; background: var(--paper); border: 1px solid #4d4d58; color: var(--ink);
+  padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.go { background: var(--moss-dark); color: var(--bone); font-weight: bold; padding: 1px 8px; border-radius: 2px; }
+.page { background: rgba(8,8,10,.92); padding: 18px; display: grid; gap: 22px; }
+.status {
+  display: flex; justify-content: space-between; gap: 10px; padding: 3px 8px;
+  border-top: 1px solid var(--face-edge); font-size: 11px; color: var(--ink-soft);
+}
+.inner { border-radius: 6px 6px 0 0; }
+.inner .bar { font-size: 12px; padding: 3px 6px 3px 8px; }
+.inner .btns button { width: 18px; height: 18px; font-size: 10px; }
+.body { padding: 14px 16px; display: grid; gap: 12px; }
+.body p { margin: 0; max-width: 66ch; }
+.win.min > :not(.bar) { display: none; }
+
+/* ---------- web de los 2000 ---------- */
+.hero { display: grid; gap: 10px; text-align: center; justify-items: center; }
+.eye {
+  width: 96px; height: 56px; border-radius: 50%; position: relative; overflow: hidden; border: 0; padding: 0;
+  background: radial-gradient(ellipse at center, var(--bone) 0 55%, #8a8a84 75%, #000 100%);
+  box-shadow: 0 0 24px rgba(242,240,230,.35);
+}
+.eye .pupil {
+  position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px;
+  border-radius: 50%; background: radial-gradient(circle at 40% 35%, #333 0 10%, #000 30%);
+  transition: transform .08s linear;
+}
+.eye::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #000; transform: scaleY(0); animation: blinkEye 6s infinite; }
+@keyframes blinkEye { 0%, 94%, 100% { transform: scaleY(0); } 97% { transform: scaleY(1); } }
+.eye:focus-visible { outline: 1px dotted var(--bone); outline-offset: 4px; }
+.logo {
+  font: 900 clamp(38px, 9vw, 78px)/1 Impact, "Arial Black", var(--font-title);
+  letter-spacing: .06em; margin: 0;
+  color: var(--bone);
+  background: linear-gradient(180deg, #ffffff 0%, #d9ccff 40%, #3a2366 52%, #b88cff 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(3px 3px 0 #000) drop-shadow(0 0 12px rgba(184,140,255,.55));
+}
+.tag { font: 22px var(--font-px); color: var(--moss); margin: 0; }
+.marquee {
+  width: 100%; overflow: hidden; background: #000; color: #39ff14;
+  font: 20px var(--font-px); border: 2px inset #444; white-space: nowrap;
+}
+.marquee span { display: inline-block; padding-left: 100%; animation: mq 26s linear infinite; }
+@keyframes mq { to { transform: translateX(-100%); } }
+.blink { animation: bl 1s steps(1) infinite; }
+@keyframes bl { 50% { visibility: hidden; } }
+.nuevo { color: #ff3b3b; font: bold 12px var(--font-2000); }
+.under {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; font-weight: bold; font-size: 12px;
+  background: repeating-linear-gradient(-45deg, #b89500 0 10px, #111 10px 20px); color: #fff;
+}
+.under b { background: #111; padding: 1px 6px; }
+.hr {
+  height: 4px; border: 0; margin: 0; width: 100%;
+  background: linear-gradient(90deg, transparent, var(--glow), var(--moss), var(--bone), var(--glow), transparent);
+  opacity: .6;
+}
+.webring {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 12px;
+  border: 1px dashed #4d4d58; padding: 6px 10px; font: 12px var(--font-2000); color: var(--ink-soft);
+}
+.badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.b88 {
+  width: 88px; height: 31px; display: grid; place-items: center; text-align: center;
+  font: bold 9px/1.1 Verdana, sans-serif; border: 1px solid #555; color: #fff; padding: 2px;
+}
+.counter { display: flex; gap: 2px; justify-content: center; }
+.counter span {
+  font: 26px/1 var(--font-px); color: #ff3b3b; background: #000; border: 1px solid #333;
+  width: 22px; text-align: center; padding: 2px 0; text-shadow: 0 0 6px #ff3b3b;
+}
+.sign { font: 13px var(--font-2000); color: var(--ink-soft); text-align: center; margin: 0; }
+.psst { font: 10px var(--font-2000); color: #3a3a3a; text-align: center; margin: 0; }
+
+/* ---------- reproductor ---------- */
+.wmp { background: #060608; padding: 10px; display: grid; gap: 8px; }
+.screen {
+  aspect-ratio: 16 / 9; width: 100%; max-width: 100%; position: relative; overflow: hidden;
+  border: 2px inset #333; background: #000;
+}
+.screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--ink-soft); font: 18px var(--font-px); }
+.controls .seek { flex: 1; min-width: 60px; height: 6px; background: #22222a; border-radius: 3px; }
+
+/* ---------- BETA ---------- */
+.dialog { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; }
+.warn-ico {
+  width: 40px; height: 36px; display: grid; place-items: end center; padding-bottom: 3px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%); background: var(--warn); font: bold 20px Arial; color: #000;
+}
+.facts { margin: 0; padding-left: 18px; display: grid; gap: 4px; max-width: 66ch; }
+
+/* ---------- DONACIONES ---------- */
+.donate { box-shadow: 0 0 0 1px var(--glow), 0 0 40px rgba(184,140,255,.35), 4px 8px 24px rgba(0,0,0,.7); }
+.donate > .bar { background: linear-gradient(180deg, #7d4fd6 0%, #4a2394 12%, #2a0f5e 60%, #12002e 100%); }
+.d-hero {
+  position: relative; overflow: hidden; text-align: center; display: grid; gap: 8px; justify-items: center;
+  padding: 26px 16px 22px;
+  background:
+    radial-gradient(60% 90% at 50% 0%, rgba(184,140,255,.35), transparent 70%),
+    linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.85)),
+    url("fondo.jpg") center 40% / cover;
+  border-bottom: 1px solid #2c1a52;
+}
+.d-hero h2 {
+  margin: 0; font: 900 clamp(28px, 6vw, 52px)/1 Impact, "Arial Black", var(--font-title); letter-spacing: .05em;
+  color: var(--bone); text-shadow: 0 0 18px rgba(184,140,255,.9), 3px 3px 0 #000;
+  text-wrap: balance;
+}
+.d-hero p { margin: 0; max-width: 52ch; color: var(--ink); }
+.cta {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+  padding: 10px 22px; border-radius: 4px; border: 1px solid #000;
+  font: bold 18px var(--font-title); color: #fff; text-shadow: 1px 1px 0 #000;
+  background: linear-gradient(180deg, #8fdc5c, #3f8a1f 45%, #2b6614 55%, #1d4a0c);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 0 0 2px #0d2a05, 0 0 22px rgba(143,220,92,.5);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+.cta:visited { color: #fff; }
+.cta:hover { filter: brightness(1.15); }
+@keyframes pulse { 50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 0 0 2px #0d2a05, 0 0 36px rgba(143,220,92,.85); } }
+
+.tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; padding: 16px; }
+.tier {
+  --c: var(--bone);
+  position: relative; display: grid; gap: 10px; align-content: start; padding: 14px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 14%, #0d0d10), #0b0b0e 60%);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, #000);
+  box-shadow: 0 0 0 1px #000, 0 0 18px color-mix(in srgb, var(--c) 25%, transparent);
+  transition: transform .15s, box-shadow .15s;
+}
+.tier:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px #000, 0 0 30px color-mix(in srgb, var(--c) 50%, transparent); }
+.tier.top { border-width: 2px; }
+.ribbon {
+  position: absolute; top: -1px; right: 10px; padding: 2px 8px; font: bold 10px var(--font-ui); letter-spacing: .08em;
+  background: var(--c); color: #000;
+}
+.tier h4 { margin: 0; font: 32px/1 var(--font-px); color: var(--c); text-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent); }
+.price { font: 40px/1 var(--font-px); font-variant-numeric: tabular-nums; color: var(--bone); }
+.price small { font-size: 18px; color: var(--ink-soft); }
+.nt-stage {
+  background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url("fondo.jpg") center 70% / cover;
+  padding: 16px 6px 8px; display: grid; place-items: center; border: 1px solid #333;
+}
+.nametag {
+  background: rgba(0,0,0,.45); color: #fff; padding: 1px 6px 0;
+  font: 22px/1 var(--font-px); white-space: nowrap; text-shadow: 2px 2px 0 rgba(0,0,0,.5);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}
+.code { font: 12px "Lucida Console", "Courier New", monospace; color: var(--ink-soft); }
+.perks { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 12px; }
+.perks li { display: flex; gap: 6px; }
+.perks li::before { content: "✔"; color: var(--c); }
+
+.death {
+  margin: 0 16px; position: relative; overflow: hidden; border: 1px solid #400; display: grid; place-items: center; gap: 8px;
+  padding: 26px 16px; text-align: center;
+  background: radial-gradient(ellipse at center, rgba(160,0,0,.55), rgba(40,0,0,.9) 70%), #200;
+}
+.death h3 { margin: 0; font: 54px/1 var(--font-px); color: #fff; text-shadow: 3px 3px 0 #3f0000; }
+.death .why { font: 20px var(--font-px); color: #ddd; }
+.death .score { font: 20px var(--font-px); color: #ddd; }
+.death .score b { color: #ffff55; font-weight: normal; }
+.death .mcbtns { display: grid; gap: 6px; width: min(260px, 100%); }
+.mcbtn {
+  font: 20px var(--font-px); color: #ddd; text-align: center; padding: 3px 0;
+  background: linear-gradient(180deg, #8b8b8b, #6b6b6b); border: 2px solid #000; box-shadow: inset 2px 2px 0 #aaa, inset -2px -2px 0 #555;
+}
+.mcbtn.off { color: #a0a0a0; background: #2c2c2c; box-shadow: inset 2px 2px 0 #3c3c3c, inset -2px -2px 0 #1a1a1a; }
+.death .lbl { position: absolute; top: 6px; left: 8px; font: 11px var(--font-ui); color: #f99; }
+
+.goalsbox { padding: 16px; display: grid; gap: 14px; }
+.thermo { display: grid; gap: 6px; }
+.total {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
+  font: 22px var(--font-px); font-variant-numeric: tabular-nums;
+}
+.total strong { font-size: 48px; color: var(--link); text-shadow: 0 0 10px rgba(166,224,90,.45); }
+.bigbar { height: 26px; background: #000; border: 1px solid #555; padding: 2px; display: flex; gap: 2px; }
+.bigbar span { flex: var(--w); position: relative; background: #141418; overflow: hidden; }
+.bigbar span i { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(90deg, #5fbf3a 0 8px, #3a8a1f 8px 10px); box-shadow: inset 0 5px 5px rgba(255,255,255,.25); }
+.goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.goal { display: grid; gap: 4px; padding: 10px; border: 1px solid var(--face-edge); background: var(--paper); align-content: start; }
+.goal-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; }
+.goal-head b { font-family: var(--font-title); color: var(--bone); }
+.goal-head span { font-variant-numeric: tabular-nums; color: var(--link); font: 20px/1 var(--font-px); }
+.goal p { margin: 0; font-size: 12px; color: var(--ink-soft); }
+.xpbar { height: 12px; border: 1px solid #555; background: #000; padding: 1px; }
+.xpbar div { height: 100%; background: repeating-linear-gradient(90deg, #5fbf3a 0 8px, transparent 8px 10px); }
+.goal.done { border-color: var(--moss); }
+.goal.done b::after { content: "  ✔"; color: var(--link); }
+.goal .step { font: 11px var(--font-ui); color: var(--ink-soft); }
+
+.payrow { padding: 0 16px 16px; display: grid; gap: 12px; }
+.wizard {
+  display: grid; grid-template-columns: minmax(0, 150px) minmax(0, 1fr); border: 1px solid var(--face-edge); background: var(--paper);
+}
+.wizard .side {
+  background: linear-gradient(180deg, #2a0f5e, #0d0420); display: grid; place-items: center; padding: 12px;
+  font: 64px/1 var(--font-px); color: var(--glow); text-shadow: 0 0 14px var(--glow);
+}
+.wizard .main { padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.wizard h4 { margin: 0; font: bold 15px var(--font-title); color: var(--bone); }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.copyrow { display: flex; gap: 6px; align-items: stretch; flex-wrap: wrap; }
+.copyrow code {
+  flex: 1 1 200px; min-width: 0; background: #000; border: 1px solid var(--moss); padding: 6px 10px; color: var(--link);
+  font: 26px/1 var(--font-px); letter-spacing: .06em; overflow-wrap: anywhere; user-select: all;
+  text-shadow: 0 0 8px rgba(166,224,90,.4);
+}
+.xpbtn {
+  font: 12px var(--font-ui); color: var(--bone); padding: 3px 14px;
+  border: 1px solid #000; border-radius: 3px; background: linear-gradient(180deg, #4a4a52, #26262c 80%, #18181c);
+  box-shadow: inset 0 0 0 1px #5d5d66;
+  text-decoration: none; display: inline-block; text-align: center;
+}
+.xpbtn:hover { box-shadow: inset 0 0 0 2px var(--glow); }
+.xpbtn:focus-visible { outline: 1px dotted var(--bone); outline-offset: -4px; }
+.small { font-size: 11px; color: var(--ink-soft); }
+.fee { font: 12px var(--font-ui); background: #1d2b12; color: var(--link); padding: 0 6px; border: 1px solid var(--moss-dark); white-space: nowrap; }
+
+/* ---------- donadores ---------- */
+.tablebox { overflow-x: auto; border: 1px solid var(--face-edge); background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 12px; }
+th { text-align: left; background: linear-gradient(180deg, var(--face-hi), var(--face)); border-bottom: 1px solid var(--face-edge); padding: 4px 8px; font-weight: normal; }
+td { padding: 4px 8px; border-bottom: 1px solid #1f1f25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.n { text-align: right; }
+.empty { padding: 18px; text-align: center; color: var(--ink-soft); }
+a { color: var(--link); }
+a:visited { color: var(--visited); }
+
+/* ---------- barra de tareas ---------- */
+.taskbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 0 env(safe-area-inset-bottom, 0px) max(0px, env(safe-area-inset-left, 0px));
+  height: calc(34px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #55555e 0%, #22222a 8%, #101014 90%, #000 100%);
+  border-top: 1px solid #000;
+}
+.startbtn {
+  height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 18px 0 10px;
+  background: linear-gradient(180deg, #6aa84a, #3a6d22 15%, #2b5418 85%, #16300a);
+  color: #fff; font: italic bold 17px var(--font-title); text-shadow: 1px 1px 1px #000;
+  border-radius: 0 12px 12px 0; text-decoration: none;
+}
+.startbtn:visited { color: #fff; }
+.flag { display: grid; grid-template-columns: 8px 8px; gap: 1px; transform: skewX(-8deg); }
+.flag i { width: 8px; height: 7px; }
+.task { flex: 1; min-width: 0; display: flex; gap: 4px; overflow: hidden; }
+.task span {
+  color: var(--bone); font-size: 12px; padding: 4px 10px; border-radius: 3px; white-space: nowrap;
+  background: #2a2a30; box-shadow: inset 0 0 0 1px #4a4a52; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.tray {
+  height: 34px; display: flex; align-items: center; gap: 8px;
+  padding: 0 max(10px, env(safe-area-inset-right, 0px)) 0 10px; color: var(--bone); font-size: 12px;
+  background: linear-gradient(180deg, #3a3a42, #1a1a20); border-left: 1px solid #000;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.mute { background: none; border: 0; color: inherit; font-size: 15px; padding: 2px; }
+.mute:focus-visible { outline: 1px dotted var(--bone); }
+.balloon {
+  position: fixed; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(44px + env(safe-area-inset-bottom, 0px)); z-index: 21;
+  background: #ffffe1; color: #000; border: 1px solid #000; padding: 8px 12px; font-size: 12px; border-radius: 8px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,.5); max-width: min(300px, calc(100vw - 32px));
+}
+.balloon b { display: block; margin-bottom: 2px; }
+
+.trail {
+  position: fixed; z-index: 30; pointer-events: none; width: 10px; height: 6px; border-radius: 50%;
+  background: radial-gradient(circle, #000 0 30%, var(--bone) 35%); opacity: .8;
+  animation: fade .7s forwards;
+}
+@keyframes fade { to { opacity: 0; transform: translateY(8px) scale(.4); } }
+
+/* ---------- screamer ---------- */
+.screamer {
+  position: fixed; inset: 0; z-index: 100; background: #000; display: grid; place-items: center; overflow: hidden;
+}
+.screamer img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: contrast(1.6) brightness(1.1);
+  animation: shake .07s linear infinite, zoom 2.2s ease-out forwards;
+}
+.screamer::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 2px, transparent 2px 4px), rgba(120,0,0,.25);
+  animation: flash .12s steps(2) infinite;
+}
+@keyframes shake {
+  0% { transform: translate(0,0) scale(var(--z,1)); } 25% { transform: translate(-14px,8px) scale(var(--z,1)); }
+  50% { transform: translate(10px,-12px) scale(var(--z,1)); } 75% { transform: translate(-8px,-6px) scale(var(--z,1)); }
+}
+@keyframes zoom { from { --z: 1; } to { --z: 1.35; } }
+@property --z { syntax: "<number>"; inherits: false; initial-value: 1; }
+@keyframes flash { 50% { opacity: .4; } }
+
+@media (max-width: 640px) {
+  .desk { grid-template-columns: minmax(0, 1fr); }
+  .icons { flex-direction: row; flex-wrap: wrap; justify-content: space-around; gap: 10px; padding-top: 0; }
+  .icon { width: 64px; overflow-wrap: anywhere; }
+  .page { padding: 12px; }
+  .menu, .task { display: none; }
+  .taskbar { justify-content: space-between; }
+  .wizard { grid-template-columns: minmax(0, 1fr); }
+  .wizard .side { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee span { animation: none; padding-left: 8px; }
+  .blink, .eye::after, .cta { animation: none; }
+  .screamer img { animation: none; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="desk">
+  <nav class="icons" aria-label="Accesos directos">
+    <a class="icon" href="#trailer"><span class="ico" aria-hidden="true">📼</span><span>Trailer.wmv</span></a>
+    <a class="icon" href="#que-es"><span class="ico" aria-hidden="true">📄</span><span>Léeme.txt</span></a>
+    <a class="icon" href="#donar"><span class="ico" aria-hidden="true">💾</span><span>Donar.exe</span></a>
+    <a class="icon" href="#metas"><span class="ico" aria-hidden="true">📊</span><span>Metas.xls</span></a>
+  </nav>
+
+  <main class="win" aria-label="VOIDSAFIO">
+    <div class="bar"><span aria-hidden="true">🌐</span><span class="t">VOIDSAFIO — Microsoft Internet Explorer</span>
+      <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" data-act="max" aria-label="Maximizar">□</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+    <div class="menu" aria-hidden="true"><span>Archivo</span><span>Edición</span><span>Ver</span><span>Favoritos</span><span>Herramientas</span><span>Ayuda</span></div>
+    <div class="addr"><span>Dirección</span><span class="field">http://www.geocities.com/voidsafio/index.htm</span><span class="go">Ir</span></div>
+
+    <div class="page">
+      <section class="hero">
+        <button class="eye" id="eye" type="button" aria-label="Ojo"><span class="pupil" id="pupil"></span></button>
+        <h1 class="logo">VOIDSAFIO</h1>
+        <p class="tag">21 días · permadeath · la señal se corrompe</p>
+        <div class="marquee" role="status"><span>*** BIENVENIDO A LA PÁGINA OFICIAL DE VOIDSAFIO *** SERVIDOR PERMADEATH DE 21 DÍAS *** LA SERIE ESTÁ EN FASE BETA *** CON TU DONACIÓN CONSIGUES UN TÍTULO EN TU NAMETAG Y TU PROPIA PANTALLA DE MUERTE *** NO MIRES A LOS OJOS ***</span></div>
+        <div class="under"><b>BETA</b> Página en construcción <span class="blink">▮</span></div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- TRAILER -->
+      <section class="win inner" id="trailer">
+        <div class="bar"><span aria-hidden="true">▶</span><span class="t">Reproductor de Windows Media — Trailer VOIDSAFIO</span>
+          <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+        <div class="wmp">
+          <div class="screen">
+            <iframe id="yt" title="Trailer de VOIDSAFIO" loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
+          <div class="controls"><span aria-hidden="true">▶ ■</span><span class="seek" aria-hidden="true"></span><a id="ytLink" href="#" target="_blank" rel="noopener">abrir en YouTube</a></div>
+        </div>
+      </section>
+
+      <!-- QUÉ ES -->
+      <section class="win inner" id="que-es">
+        <div class="bar"><span aria-hidden="true">📄</span><span class="t">Léeme.txt — Bloc de notas</span>
+          <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+        <div class="body">
+          <p><b>VOIDSAFIO</b> es un servidor de Minecraft <b>estilo permadeath</b>, hecho por pura diversión entre amigos, y una serie que vamos grabando mientras jugamos. Si mueres, se acabó: te quedas fuera hasta la próxima temporada.</p>
+          <p>Durante <b>21 días</b> el servidor se vuelve más hostil cada día: las reglas del mundo cambian, aparecen criaturas nuevas hechas por nosotros y la noche dura cada vez más.</p>
+          <p>Todo corre sobre un modpack propio con mods hechos a mano: mazmorras (la Fortaleza del Nether, el Búnker radiactivo y la Grieta), jefes, una economía con banco y casino, armaduras nuevas y una cordura invisible que juega con tu cabeza.</p>
+          <p>Lo hago yo solo en mis ratos libres: el servidor, los mods, la grabación y la edición. Por eso pido apoyo.</p>
+        </div>
+      </section>
+
+      <!-- BETA -->
+      <section class="win inner">
+        <div class="bar"><span aria-hidden="true">⚠</span><span class="t">Advertencia de seguridad</span>
+          <span class="btns"><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+        <div class="body dialog">
+          <div class="warn-ico" aria-hidden="true">!</div>
+          <div class="body" style="padding:0">
+            <p><b>El proyecto está en fase BETA.</b> Ya se puede jugar, pero todavía hay errores, cosas sin balancear y contenido que va a cambiar.</p>
+            <ul class="facts">
+              <li>Día 1 de la temporada: <b>viernes 30 de octubre de 2026</b> (<span id="countdown">—</span>).</li>
+              <li>Tu donación ayuda a pagar el servidor y el tiempo de desarrollo.</li>
+              <li>Si encuentras un bug, avísame: también es una forma de apoyar.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- DONACIONES -->
+      <section class="win donate" id="donar">
+        <div class="bar"><span aria-hidden="true">💾</span><span class="t">Donar.exe — Apoya al vacío</span>
+          <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+
+        <div class="d-hero">
+          <h2>ALIMENTA AL VACÍO</h2>
+          <p>Con cualquier donación te ganas un <b>título permanente sobre tu nombre</b> y tu <b>propia pantalla de muerte</b>. Todo es cosmético: nadie compra ventajas.</p>
+          <a class="cta" href="#pagar" data-snd="nuevo">💾 DONAR AHORA</a>
+        </div>
+
+        <div class="tiers" id="tiers"></div>
+
+        <div class="death" aria-label="Vista previa del overlay de muerte">
+          <span class="lbl">Vista previa · overlay de muerte custom</span>
+          <h3>¡HAS MUERTO!</h3>
+          <div class="why" id="deathWhy">TuNombre fue devorado por el vacío</div>
+          <div class="score">Puntuación: <b>21</b></div>
+          <div class="mcbtns"><span class="mcbtn off">Reaparecer</span><span class="mcbtn">Modo espectador</span></div>
+        </div>
+        <p class="small" style="margin:8px 16px 0">El texto, los colores y el mensaje de tu pantalla de muerte los decidimos juntos.</p>
+
+        <div class="goalsbox" id="metas">
+          <div class="thermo">
+            <div class="total"><span>Recaudado:</span><strong id="total">$0</strong><span id="totalOf"></span></div>
+            <div class="bigbar" id="bigbar" role="img"></div>
+          </div>
+          <div class="goals" id="goals"></div>
+          <p class="small" id="updated"></p>
+        </div>
+
+        <div class="payrow" id="pagar">
+          <div class="wizard">
+            <div class="side" aria-hidden="true">$</div>
+            <div class="main">
+              <h4>Asistente para donar <span class="fee">comisión 0 %</span></h4>
+              <ol class="steps">
+                <li>Abre la app de tu banco y haz una <b>transferencia SPEI</b> a esta CLABE (<span id="banco"></span>).</li>
+                <li>En el concepto escribe <b>tu nombre de Minecraft</b>.</li>
+                <li>Mándame la captura por WhatsApp o Discord y te pongo el título en menos de 24 h.</li>
+              </ol>
+              <div class="copyrow"><code id="clabe"></code><button class="xpbtn" type="button" id="copy">Copiar CLABE</button></div>
+              <p class="small">Los títulos se pagan en pesos (MXN); las metas están en dólares (USD). Si no tienes con qué donar, compartir la serie también ayuda.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DONADORES -->
+      <section class="win inner">
+        <div class="bar"><span aria-hidden="true">👥</span><span class="t">Libro de donadores</span>
+          <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+        <div class="body"><div class="tablebox" id="donors"></div></div>
+      </section>
+
+      <hr class="hr">
+
+      <section class="webring" aria-label="Webring">
+        <span>&lt;&lt; anterior</span>
+        <span>✦ Este sitio es parte del <b>Webring del Vacío</b> ✦</span>
+        <span>siguiente &gt;&gt;</span>
+      </section>
+
+      <div class="counter" aria-label="Días para el día 1" id="counter"></div>
+      <p class="sign">días para que se abra el vacío · <span class="nuevo blink">¡NUEVO!</span> · agréganos a tus favoritos con Ctrl+D</p>
+
+      <section class="badges" aria-label="Insignias">
+        <span class="b88" style="background:#1a0033">VOIDSAFIO<br>BETA</span>
+        <span class="b88" style="background:#000;color:#9ad">Mejor visto con<br>IE 6.0</span>
+        <span class="b88" style="background:#24461a">MINECRAFT<br>1.21.1</span>
+        <span class="b88" style="background:#111;color:#39ff14">HECHO CON<br>BLOC DE NOTAS</span>
+        <span class="b88" style="background:#2b2b2b;color:#ffaa00">800 × 600<br>16 bits</span>
+      </section>
+      <p class="psst">psst... no le piques al ojo tres veces</p>
+    </div>
+
+    <div class="status"><span>✔ Listo</span><span>🌐 Internet</span></div>
+  </main>
+</div>
+
+<div class="taskbar">
+  <a class="startbtn" href="#donar" data-snd="inicio"><span class="flag" aria-hidden="true"><i style="background:#f35325"></i><i style="background:#81bc06"></i><i style="background:#05a6f0"></i><i style="background:#ffba08"></i></span>inicio</a>
+  <div class="task" aria-hidden="true"><span>🌐 VOIDSAFIO — Internet Explorer</span><span>▶ Trailer</span></div>
+  <div class="tray"><button class="mute" type="button" id="mute" aria-label="Silenciar sonidos">🔊</button><span id="clock">--:--</span></div>
+</div>
+<div class="balloon" id="balloon" hidden role="status"></div>
+
+<script>
+/* =====================================================================
+   DATOS EDITABLES — todo lo que cambia está aquí.
+   ===================================================================== */
+const CONFIG = {
+  youtube: "75ysk6J_gTA",            // id del trailer
+  lanzamiento: "2026-10-30T18:00:00-06:00",
+  dias: 21,
+  actualizado: "28 de octubre de 2026",
+  pesosPorDolar: 18.5,               // para pasar donaciones (MXN) a las metas (USD)
+  clabe: "638180000082266727",
+  banco: "Nu México",
+};
+
+// Niveles de título (montos acumulados en MXN). Colores = códigos de Minecraft.
+const NIVELES = [
+  { nombre: "Wholesome", desde: 25,  titulo: "[Wholesome]", color: "var(--mc-green)",  codigo: "§a[Wholesome]",
+    perks: ["Título verde en tu nametag", "Overlay de muerte custom", "Tu nombre en el libro de donadores"] },
+  { nombre: "Void",      desde: 75,  titulo: "[Void]",      color: "var(--mc-purple)", codigo: "§d[Void]",
+    perks: ["Título morado neón en tu nametag", "Overlay de muerte custom", "Lo del nivel anterior"], ribbon: "EL FAVORITO" },
+  { nombre: "Edgy",      desde: 200, titulo: "[Edgy]",      color: "var(--mc-red)",    codigo: "§c§l[Edgy]", bold: true,
+    perks: ["Título rojo en negritas", "Overlay de muerte custom", "Tu nombre en los créditos de la serie", "Lo de los niveles anteriores"] },
+];
+
+// Metas (USD cada una). Se llenan en orden, una tras otra.
+const METAS = [
+  { nombre: "Hosting del servidor", usd: 13, texto: "Un mes de servidor encendido sin depender de mi PC." },
+  { nombre: "Voces con IA",         usd: 5,  texto: "Voces personalizadas de Joaquín López-Dóriga y Peña Nieto para el noticiero del servidor." },
+  { nombre: "Apoyo por linda",      usd: 15, texto: "Porque sí. Porque me quieres." },
+  { nombre: "Mejorar el proyecto",  usd: 25, texto: "Más mods propios, texturas, sonidos y mejor edición." },
+];
+
+// Donaciones confirmadas (en MXN). Agrega una línea por donación:
+// { jugador: "Steve", monto: 75, fecha: "2026-10-30" },
+const DONACIONES = [
+];
+
+const MUERTES = ["fue devorado por el vacío", "miró a los ojos", "perdió la señal", "creyó que era de día", "escuchó una voz que no era de nadie"];
+
+/* ===================================================================== */
+const $ = (s) => document.querySelector(s);
+const mxn = (n) => "$" + Math.round(n).toLocaleString("es-MX") + " MXN";
+const usd = (n) => "$" + (Math.round(n * 100) / 100).toLocaleString("en-US") + " USD";
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === "style" ? e.style.cssText = v : e.setAttribute(k, v);
+  for (const k of kids) e.append(k);
+  return e;
+};
+const nametag = (nivel, nombre) => {
+  const t = el("span", { class: "nametag" });
+  if (nivel) t.append(el("span", { style: "color:" + nivel.color + (nivel.bold ? ";font-weight:bold" : "") }, nivel.titulo + " "));
+  t.append(nombre);
+  return t;
+};
+const nivelDe = (total) => [...NIVELES].reverse().find((n) => total >= n.desde) || null;
+
+/* ---------- sonidos de Windows XP (los mismos de la interfaz del juego) ---------- */
+const SND = {};
+let muted = false, armed = false;
+try { muted = localStorage.getItem("vs-mute") === "1"; } catch (e) {}
+function play(name, force) {
+  if ((muted && !force) || !armed) return;
+  const a = SND[name] || (SND[name] = new Audio("sonidos/" + name + ".mp3"));
+  a.volume = 0.6;
+  try { a.currentTime = 0; } catch (e) {}
+  a.play().catch(() => {});
+}
+function setMute(v) {
+  muted = v;
+  $("#mute").textContent = v ? "🔇" : "🔊";
+  $("#mute").setAttribute("aria-label", v ? "Activar sonidos" : "Silenciar sonidos");
+  try { localStorage.setItem("vs-mute", v ? "1" : "0"); } catch (e) {}
+}
+setMute(muted);
+$("#mute").addEventListener("click", () => { setMute(!muted); if (!muted) { armed = true; play("ding"); } });
+// El navegador solo deja sonar después del primer clic: ese clic toca el inicio de XP.
+document.addEventListener("pointerdown", (e) => {
+  if (armed) return;
+  armed = true;
+  if (!e.target.closest("#eye, #mute")) play("inicio");
+}, { once: true });
+
+function balloon(title, msg, snd = "globo") {
+  const b = $("#balloon");
+  b.replaceChildren(el("b", {}, title), msg);
+  b.hidden = false; play(snd);
+  clearTimeout(balloon.id); balloon.id = setTimeout(() => (b.hidden = true), 3200);
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-snd], a, button");
+  if (!t || t.id === "mute" || t.id === "eye" || t.dataset.act) return;
+  if (t.dataset.snd) play(t.dataset.snd);
+  else if (t.tagName === "A") play("navegar");
+});
+
+document.querySelectorAll(".btns button").forEach((b) => b.addEventListener("click", () => {
+  const win = b.closest(".win");
+  if (b.dataset.act === "min") {
+    const min = win.classList.toggle("min");
+    b.textContent = min ? "▢" : "_";
+    play(min ? "plegar" : "desplegar");
+  } else if (b.dataset.act === "max") {
+    play("pestana");
+  } else {
+    balloon("Acceso denegado", "No puedes cerrar el vacío.", "error");
+  }
+}));
+
+/* ---------- trailer ---------- */
+$("#yt").src = "https://www.youtube-nocookie.com/embed/" + CONFIG.youtube + "?rel=0&modestbranding=1";
+$("#ytLink").href = "https://www.youtube.com/watch?v=" + CONFIG.youtube;
+
+/* ---------- niveles ---------- */
+for (const n of NIVELES) {
+  const card = el("article", { class: "tier" + (n === NIVELES[NIVELES.length - 1] ? " top" : ""), style: "--c:" + n.color },
+    n.ribbon ? el("span", { class: "ribbon" }, n.ribbon) : "",
+    el("h4", {}, n.nombre),
+    el("div", { class: "price" }, "$" + n.desde, el("small", {}, " MXN o más")),
+    el("div", { class: "nt-stage" }, nametag(n, "TuNombre")),
+    el("span", { class: "code" }, n.codigo),
+    el("ul", { class: "perks" }, ...n.perks.map((x) => el("li", {}, x)))
+  );
+  card.addEventListener("mouseenter", () => play("pestana"));
+  $("#tiers").append(card);
+}
+let mi = 0;
+setInterval(() => { mi = (mi + 1) % MUERTES.length; $("#deathWhy").textContent = "TuNombre " + MUERTES[mi]; }, 2600);
+$("#deathWhy").textContent = "TuNombre " + MUERTES[0];
+
+/* ---------- metas ---------- */
+const totalMxn = DONACIONES.reduce((s, d) => s + d.monto, 0);
+const totalUsd = totalMxn / CONFIG.pesosPorDolar;
+const metaUsd = METAS.reduce((s, m) => s + m.usd, 0);
+$("#total").textContent = usd(totalUsd);
+$("#totalOf").textContent = "de " + usd(metaUsd) + " · " + mxn(totalMxn) + " recibidos";
+$("#bigbar").setAttribute("aria-label", "Progreso: " + usd(totalUsd) + " de " + usd(metaUsd));
+let prev = 0;
+METAS.forEach((m, i) => {
+  const pct = Math.max(0, Math.min(1, (totalUsd - prev) / m.usd));
+  $("#bigbar").append(el("span", { style: "--w:" + m.usd, title: m.nombre }, el("i", { style: "width:" + (pct * 100).toFixed(1) + "%" })));
+  $("#goals").append(el("div", { class: "goal" + (pct >= 1 ? " done" : "") },
+    el("span", { class: "step" }, "Meta " + (i + 1) + " de " + METAS.length),
+    el("div", { class: "goal-head" }, el("b", {}, m.nombre), el("span", {}, "$" + m.usd + " USD")),
+    el("div", { class: "xpbar" }, el("div", { style: "width:" + (pct * 100).toFixed(1) + "%" })),
+    el("p", {}, m.texto + " (≈ " + mxn(m.usd * CONFIG.pesosPorDolar) + ")")
+  ));
+  prev += m.usd;
+});
+$("#updated").textContent = "Última actualización: " + CONFIG.actualizado + ". Las donaciones se agregan a mano cuando las confirmo. Tipo de cambio usado: $" + CONFIG.pesosPorDolar + " MXN por dólar.";
+
+/* ---------- donadores ---------- */
+const porJugador = {};
+for (const d of DONACIONES) {
+  const p = (porJugador[d.jugador] ||= { jugador: d.jugador, monto: 0, fecha: d.fecha });
+  p.monto += d.monto; if (d.fecha > p.fecha) p.fecha = d.fecha;
+}
+const lista = Object.values(porJugador).sort((a, b) => b.monto - a.monto);
+if (!lista.length) {
+  $("#donors").append(el("div", { class: "empty" },
+    el("div", {}, "Todavía no hay donaciones. El primero se lleva la gloria."),
+    el("div", { class: "nt-stage", style: "margin-top:10px" }, nametag(NIVELES[0], "¿Tú?"))));
+} else {
+  const tb = el("tbody");
+  for (const p of lista) {
+    tb.append(el("tr", {},
+      el("td", {}, nametag(nivelDe(p.monto), p.jugador)),
+      el("td", { class: "n" }, mxn(p.monto)),
+      el("td", {}, nivelDe(p.monto)?.nombre || "—"),
+      el("td", {}, p.fecha)));
+  }
+  $("#donors").append(el("table", {},
+    el("thead", {}, el("tr", {}, el("th", {}, "Jugador"), el("th", {}, "Total"), el("th", {}, "Nivel"), el("th", {}, "Última"))), tb));
+}
+
+/* ---------- pago ---------- */
+$("#clabe").textContent = CONFIG.clabe;
+$("#banco").textContent = CONFIG.banco;
+$("#copy").addEventListener("click", () => {
+  navigator.clipboard.writeText(CONFIG.clabe).then(() => balloon("Copiado", "CLABE copiada al portapapeles.", "ding"), () => {
+    const r = document.createRange(); r.selectNodeContents($("#clabe"));
+    getSelection().removeAllRanges(); getSelection().addRange(r);
+    balloon("Seleccionado", "Usa Ctrl+C para copiarla.", "ding");
+  });
+});
+
+/* ---------- cuenta atrás, contador y reloj ---------- */
+const launch = new Date(CONFIG.lanzamiento);
+function tick() {
+  const now = new Date();
+  $("#clock").textContent = now.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+  const days = Math.floor((now - launch) / 864e5);
+  const left = Math.max(0, Math.ceil((launch - now) / 864e5));
+  $("#countdown").textContent = now < launch
+    ? "faltan " + left + " días"
+    : days < CONFIG.dias ? "hoy es el día " + (days + 1) + " de " + CONFIG.dias : "temporada terminada";
+  $("#counter").replaceChildren(...String(left).padStart(6, "0").split("").map((d) => el("span", {}, d)));
+}
+tick(); setInterval(tick, 30000);
+
+/* ---------- el ojo te sigue ---------- */
+const pupil = $("#pupil"), eye = $("#eye");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let lastTrail = 0;
+addEventListener("pointermove", (e) => {
+  const r = eye.getBoundingClientRect();
+  const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+  const a = Math.atan2(dy, dx), d = Math.min(1, Math.hypot(dx, dy) / 300);
+  pupil.style.transform = `translate(${Math.cos(a) * 26 * d}px, ${Math.sin(a) * 10 * d}px)`;
+  if (reduce || e.pointerType !== "mouse" || e.timeStamp - lastTrail < 60) return;
+  lastTrail = e.timeStamp;
+  const t = el("span", { class: "trail", style: `left:${e.clientX + 8}px;top:${e.clientY + 10}px` });
+  document.body.append(t);
+  setTimeout(() => t.remove(), 700);
+});
+
+/* ---------- easter egg: 3 clics al ojo o escribir "corre" ---------- */
+const scream = new Audio("corre.mp3");
+const screamImg = new Image(); screamImg.src = "screamer.webp"; screamImg.decode?.().catch(() => {});
+scream.preload = "auto";
+let eyeClicks = 0, eyeTimer, typed = "", screaming = false;
+function screamer() {
+  if (screaming) return;
+  screaming = true;
+  const box = el("div", { class: "screamer", role: "dialog", "aria-label": "Screamer" }, el("img", { src: screamImg.src, alt: "" }));
+  document.body.append(box);
+  try { scream.currentTime = 0; } catch (e) {}
+  scream.volume = 1;
+  scream.play().catch(() => {});
+  const close = () => { box.remove(); scream.pause(); screaming = false; };
+  box.addEventListener("click", close);
+  addEventListener("keydown", (e) => { if (e.key === "Escape") close(); }, { once: true });
+  scream.onended = close;
+  setTimeout(close, 9000);
+}
+eye.addEventListener("click", () => {
+  armed = true;
+  clearTimeout(eyeTimer); eyeTimer = setTimeout(() => (eyeClicks = 0), 1500);
+  if (++eyeClicks >= 3) { eyeClicks = 0; screamer(); } else play("pestana");
+});
+addEventListener("keydown", (e) => {
+  if (e.key.length !== 1) return;
+  typed = (typed + e.key.toLowerCase()).slice(-5);
+  if (typed === "corre") { armed = true; screamer(); }
+});
+</script>
+</body>
+</html>
