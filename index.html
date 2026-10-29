@@ -282,11 +282,11 @@ body {
 .perks li::before { content: "✔"; color: var(--c); }
 
 /* Vista previa del anuncio de muerte: copia de #muerte en el hud.html del juego
-   (Void=full/minecraft/config/webgui/web/hud.html), sobre una escena del mundo. */
+   (Void=full/minecraft/config/webgui/web/hud.html), sobre una escena del mundo de noche. */
 .death { margin: 0 16px; display: grid; gap: 8px; }
 .dv-scene {
   position: relative; overflow: hidden; aspect-ratio: 16 / 9; border: 1px solid #000;
-  background: url("fondo.jpg") center 70% / cover; container-type: inline-size;
+  background: #000 url("muerte_fondo.webp") 68% 60% / cover; container-type: inline-size;
   font-family: "Courier New", "DejaVu Sans Mono", monospace; color: #d8d8d0; text-align: center;
 }
 .dv-scene .lbl { position: absolute; top: 6px; left: 8px; z-index: 5; font: 11px var(--font-ui); color: #f99; text-shadow: 1px 1px 2px #000; }
@@ -715,7 +715,7 @@ const CONFIG = {
 const NIVELES = [
   { nombre: "Wholesome", desde: 25,  titulo: "[Wholesome]", color: "var(--mc-green)",  codigo: "§a[Wholesome]",
     perks: ["Título verde en tu nametag", "Tu anuncio de muerte: imagen, sonido y mensaje", "Tu nombre en el libro de donadores"] },
-  { nombre: "Void",      desde: 75,  titulo: "[Void]",      color: "var(--mc-purple)", codigo: "§d[Void]",
+  { nombre: "Void",      desde: 90,  titulo: "[Void]",      color: "var(--mc-purple)", codigo: "§d[Void]",
     perks: ["Título morado neón en tu nametag", "Capa custom en el servidor", "Lo del nivel anterior"], ribbon: "EL FAVORITO" },
   { nombre: "Edgy",      desde: 200, titulo: "[Edgy]",      color: "var(--mc-red)",    codigo: "§c§l[Edgy]", bold: true,
     perks: ["Título rojo en negritas", "Tu nombre en los créditos de la serie", "Lo de los niveles anteriores (anuncio de muerte y capa)"] },
