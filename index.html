@@ -281,22 +281,63 @@ body {
 .perks li { display: flex; gap: 6px; }
 .perks li::before { content: "✔"; color: var(--c); }
 
-.death {
-  margin: 0 16px; position: relative; overflow: hidden; border: 1px solid #400; display: grid; place-items: center; gap: 8px;
-  padding: 26px 16px; text-align: center;
-  background: radial-gradient(ellipse at center, rgba(160,0,0,.55), rgba(40,0,0,.9) 70%), #200;
+/* Vista previa del anuncio de muerte: copia de #muerte en el hud.html del juego
+   (Void=full/minecraft/config/webgui/web/hud.html), sobre una escena del mundo. */
+.death { margin: 0 16px; display: grid; gap: 8px; }
+.dv-scene {
+  position: relative; overflow: hidden; aspect-ratio: 16 / 9; border: 1px solid #000;
+  background: url("fondo.jpg") center 70% / cover; container-type: inline-size;
+  font-family: "Courier New", "DejaVu Sans Mono", monospace; color: #d8d8d0; text-align: center;
 }
-.death h3 { margin: 0; font: 54px/1 var(--font-px); color: #fff; text-shadow: 3px 3px 0 #3f0000; }
-.death .why { font: 20px var(--font-px); color: #ddd; }
-.death .score { font: 20px var(--font-px); color: #ddd; }
-.death .score b { color: #ffff55; font-weight: normal; }
-.death .mcbtns { display: grid; gap: 6px; width: min(260px, 100%); }
-.mcbtn {
-  font: 20px var(--font-px); color: #ddd; text-align: center; padding: 3px 0;
-  background: linear-gradient(180deg, #8b8b8b, #6b6b6b); border: 2px solid #000; box-shadow: inset 2px 2px 0 #aaa, inset -2px -2px 0 #555;
+.dv-scene .lbl { position: absolute; top: 6px; left: 8px; z-index: 5; font: 11px var(--font-ui); color: #f99; text-shadow: 1px 1px 2px #000; }
+.dv-over {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6cqw;
+  background: radial-gradient(ellipse 75% 65% at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,.22) 55%, rgba(0,0,0,.55) 100%);
+  text-shadow: 0 2px 4px rgba(0,0,0,.95), 0 0 14px rgba(0,0,0,.8);
+  opacity: 0; transition: opacity .16s linear; z-index: 2;
 }
-.mcbtn.off { color: #a0a0a0; background: #2c2c2c; box-shadow: inset 2px 2px 0 #3c3c3c, inset -2px -2px 0 #1a1a1a; }
-.death .lbl { position: absolute; top: 6px; left: 8px; font: 11px var(--font-ui); color: #f99; }
+.dv-over::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 62%; z-index: -1;
+  background: radial-gradient(ellipse 45% 50% at 50% 50%, rgba(0,0,0,.6) 0%, rgba(0,0,0,.36) 55%, rgba(0,0,0,0) 100%);
+}
+.dv-over.on { opacity: 1; }
+@media (max-width: 640px) { .dv-scene { aspect-ratio: 3 / 4; } }
+.dv-cab { font-size: clamp(7px, 1.5cqw, 11px); color: #b0b0aa; letter-spacing: .3em; }
+.dv-big { font-size: clamp(13px, 6cqw, 44px); font-weight: 700; letter-spacing: .1em; color: #d8d8d0; line-height: 1.1; }
+.dv-who { font-size: clamp(10px, 2.6cqw, 19px); color: #ff4450; letter-spacing: .2em; }
+.dv-why { font-size: clamp(9px, 1.7cqw, 12.5px); color: #bcbcb6; }
+.dv-num { font-size: clamp(7px, 1.5cqw, 11px); color: #a0a0a6; letter-spacing: .24em; margin-top: .8cqw; }
+.dv-glitch { position: relative; }
+.dv-glitch::before, .dv-glitch::after { content: attr(data-t); position: absolute; inset: 0; z-index: -1; text-shadow: none; }
+.dv-glitch::before { color: #ff2d3f; transform: translate(-3px, 0); }
+.dv-glitch::after { color: #2df0ff; transform: translate(3px, 0); }
+.dv-over.on .dv-glitch { animation: dvShake .22s steps(2) infinite; }
+@keyframes dvShake { 0% { transform: translate(0,0) } 25% { transform: translate(-2px,1px) } 50% { transform: translate(2px,-1px) } 75% { transform: translate(-1px,-1px) } 100% { transform: translate(0,0) } }
+.dv-bar {
+  position: absolute; left: 0; width: 100%; height: 22%; top: -24%; z-index: 1;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,.055) 42%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.055) 58%, transparent);
+}
+.dv-bar.pasa { animation: dvSweep 1.1s linear; }
+@keyframes dvSweep { from { top: -24% } to { top: 100% } }
+/* lo personalizable: solo se ve en el modo "con tu personalización" */
+.dv-img, .dv-msg { display: none; position: relative; }
+.dv-img .dv-tag { top: -9px; left: 50%; transform: translateX(-50%); }
+.dv-msg .dv-tag { top: -14px; left: 50%; transform: translateX(-50%); }
+.dv-scene > .dv-tag { bottom: 6px; right: 8px; }
+.death.custom .dv-img {
+  display: grid; place-items: center; width: clamp(40px, 11cqw, 90px); aspect-ratio: 1; border: 1px dashed #ff4450;
+  background: rgba(0,0,0,.45); font-size: clamp(18px, 5cqw, 40px); line-height: 1; margin-bottom: 4px;
+}
+.death.custom .dv-msg { display: block; font-size: clamp(10px, 1.9cqw, 14px); font-style: italic; color: #f2f0e6; max-width: 80%; margin-top: 14px; }
+.dv-tag {
+  display: none; position: absolute; z-index: 4; font: bold 10px var(--font-ui); color: #000; background: var(--warn);
+  padding: 1px 5px; border: 1px solid #000; white-space: nowrap; text-shadow: none; font-style: normal; letter-spacing: 0;
+}
+.death.custom .dv-tag { display: block; }
+.dv-ctrl { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dv-ctrl .xpbtn[aria-pressed="true"] { box-shadow: inset 1px 1px 0 #000; background: #3a3a44; color: #fff; }
+.dv-legend { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce) { .dv-over.on .dv-glitch, .dv-bar.pasa { animation: none; } }
 
 .goalsbox { padding: 16px; display: grid; gap: 14px; }
 .thermo { display: grid; gap: 6px; }
@@ -541,20 +582,39 @@ a:visited { color: var(--visited); }
 
         <div class="d-hero">
           <h2>ALIMENTA AL VACÍO</h2>
-          <p>Con cualquier donación te ganas un <b>título permanente sobre tu nombre</b> y tu <b>propia pantalla de muerte</b>. Todo es cosmético: nadie compra ventajas.</p>
+          <p>Con cualquier donación te ganas un <b>título permanente sobre tu nombre</b> y tu <b>propio anuncio de muerte</b>; desde Void, también una <b>capa custom</b>. Todo es cosmético: nadie compra ventajas.</p>
           <a class="cta" href="#pagar" data-snd="nuevo">💾 DONAR AHORA</a>
         </div>
 
         <div class="tiers" id="tiers"></div>
 
-        <div class="death" aria-label="Vista previa del overlay de muerte">
-          <span class="lbl">Vista previa · overlay de muerte custom</span>
-          <h3>¡HAS MUERTO!</h3>
-          <div class="why" id="deathWhy">TuNombre fue devorado por el vacío</div>
-          <div class="score">Puntuación: <b>21</b></div>
-          <div class="mcbtns"><span class="mcbtn off">Reaparecer</span><span class="mcbtn">Modo espectador</span></div>
+        <div class="death" id="death">
+          <div class="dv-scene" role="img" aria-label="Vista previa del anuncio de muerte del juego: SUJETO ELIMINADO">
+            <span class="lbl" id="dvLbl">Vista previa · así lo ve todo el servidor</span>
+            <span class="dv-tag">🔊 tu sonido</span>
+            <div class="dv-bar" id="dvBar"></div>
+            <div class="dv-over" id="dvOver">
+              <div class="dv-img"><span class="dv-tag">🖼 tu imagen</span>👁</div>
+              <div class="dv-cab">TRANSMISION INTERRUMPIDA</div>
+              <div class="dv-big dv-glitch" data-t="SUJETO ELIMINADO">SUJETO ELIMINADO</div>
+              <div class="dv-who">&gt; TUNOMBRE</div>
+              <div class="dv-why" id="deathWhy">Causa: devorado por el vacío</div>
+              <div class="dv-msg"><span class="dv-tag">💬 tu mensaje</span>“Nos vemos del otro lado de la señal.”</div>
+              <div class="dv-num">BAJA NUMERO 4</div>
+            </div>
+          </div>
+          <div class="dv-ctrl">
+            <button class="xpbtn" type="button" id="dvBase" aria-pressed="true">Original</button>
+            <button class="xpbtn" type="button" id="dvCustom" aria-pressed="false">Con tu personalización</button>
+            <button class="xpbtn" type="button" id="dvPlay">▶ Reproducir con sonido</button>
+          </div>
+          <ul class="dv-legend">
+            <li>🖼 <b>Imagen</b> que sale en tu anuncio</li>
+            <li>🔊 <b>Sonido</b> que escucha todo el servidor</li>
+            <li>💬 <b>Mensaje</b> de despedida</li>
+          </ul>
         </div>
-        <p class="small" style="margin:8px 16px 0">El texto, los colores y el mensaje de tu pantalla de muerte los decidimos juntos.</p>
+        <p class="small" style="margin:8px 16px 0">Es el anuncio real del juego: cuando alguien muere, lo ve todo el servidor. Con tu donación cambias la imagen, el sonido y el mensaje; “SUJETO ELIMINADO”, tu nombre y la causa se quedan igual para todos. Como lo ve todo el servidor, revisamos cada uno a mano: imagen de hasta 512 px, sonido de hasta 3 s y mensaje de hasta 80 caracteres.</p>
 
         <div class="goalsbox" id="metas">
           <div class="thermo">
@@ -654,11 +714,11 @@ const CONFIG = {
 // Niveles de título (montos acumulados en MXN). Colores = códigos de Minecraft.
 const NIVELES = [
   { nombre: "Wholesome", desde: 25,  titulo: "[Wholesome]", color: "var(--mc-green)",  codigo: "§a[Wholesome]",
-    perks: ["Título verde en tu nametag", "Overlay de muerte custom", "Tu nombre en el libro de donadores"] },
+    perks: ["Título verde en tu nametag", "Tu anuncio de muerte: imagen, sonido y mensaje", "Tu nombre en el libro de donadores"] },
   { nombre: "Void",      desde: 75,  titulo: "[Void]",      color: "var(--mc-purple)", codigo: "§d[Void]",
-    perks: ["Título morado neón en tu nametag", "Overlay de muerte custom", "Lo del nivel anterior"], ribbon: "EL FAVORITO" },
+    perks: ["Título morado neón en tu nametag", "Capa custom en el servidor", "Lo del nivel anterior"], ribbon: "EL FAVORITO" },
   { nombre: "Edgy",      desde: 200, titulo: "[Edgy]",      color: "var(--mc-red)",    codigo: "§c§l[Edgy]", bold: true,
-    perks: ["Título rojo en negritas", "Overlay de muerte custom", "Tu nombre en los créditos de la serie", "Lo de los niveles anteriores"] },
+    perks: ["Título rojo en negritas", "Tu nombre en los créditos de la serie", "Lo de los niveles anteriores (anuncio de muerte y capa)"] },
 ];
 
 // Metas (USD cada una). Se llenan en orden, una tras otra.
@@ -674,7 +734,8 @@ const METAS = [
 const DONACIONES = [
 ];
 
-const MUERTES = ["fue devorado por el vacío", "miró a los ojos", "perdió la señal", "creyó que era de día", "escuchó una voz que no era de nadie"];
+// Causas que rotan en la vista previa del anuncio de muerte.
+const MUERTES = ["devorado por el vacío", "miró a la luna", "perdió la señal", "creyó que era de día", "escuchó una voz que no era de nadie"];
 
 /* ===================================================================== */
 const $ = (s) => document.querySelector(s);
@@ -766,9 +827,53 @@ for (const n of NIVELES) {
   card.addEventListener("mouseenter", () => play("pestana"));
   $("#tiers").append(card);
 }
-let mi = 0;
-setInterval(() => { mi = (mi + 1) % MUERTES.length; $("#deathWhy").textContent = "TuNombre " + MUERTES[mi]; }, 2600);
-$("#deathWhy").textContent = "TuNombre " + MUERTES[0];
+/* ---------- anuncio de muerte (mismos tiempos que hud.html: 5 s en pantalla) ---------- */
+let mi = 0, dvTimer = 0;
+function dvMostrar() {
+  clearTimeout(dvTimer);
+  $("#deathWhy").textContent = "Causa: " + MUERTES[mi];
+  mi = (mi + 1) % MUERTES.length;
+  const b = $("#dvBar");
+  b.classList.remove("pasa"); void b.offsetWidth; b.classList.add("pasa");
+  $("#dvOver").classList.add("on");
+  dvTimer = setTimeout(() => {
+    $("#dvOver").classList.remove("on");
+    dvTimer = setTimeout(dvMostrar, 1800);
+  }, 5000);
+}
+dvMostrar();
+
+// El juego toca block.beacon.deactivate (tono 0.35) y entity.elder_guardian.curse (0.4).
+// Aquí se imita con Web Audio: un zumbido que se apaga y un chillido grave encima.
+let dvCtx = null;
+function dvSonido() {
+  try {
+    dvCtx = dvCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const c = dvCtx, t = c.currentTime, out = c.createGain();
+    out.gain.value = 0.35; out.connect(c.destination);
+    const hum = c.createOscillator(), humG = c.createGain(), lp = c.createBiquadFilter();
+    hum.type = "sawtooth"; hum.frequency.setValueAtTime(180, t); hum.frequency.exponentialRampToValueAtTime(45, t + 1.6);
+    lp.type = "lowpass"; lp.frequency.value = 700;
+    humG.gain.setValueAtTime(0.0001, t); humG.gain.exponentialRampToValueAtTime(0.9, t + 0.05); humG.gain.exponentialRampToValueAtTime(0.0001, t + 1.7);
+    hum.connect(lp).connect(humG).connect(out); hum.start(t); hum.stop(t + 1.8);
+    const cry = c.createOscillator(), cryG = c.createGain(), vib = c.createOscillator(), vibG = c.createGain();
+    cry.type = "triangle"; cry.frequency.setValueAtTime(520, t + 0.1); cry.frequency.exponentialRampToValueAtTime(260, t + 2.2);
+    vib.frequency.value = 7; vibG.gain.value = 18; vib.connect(vibG).connect(cry.frequency);
+    cryG.gain.setValueAtTime(0.0001, t + 0.1); cryG.gain.exponentialRampToValueAtTime(0.25, t + 0.4); cryG.gain.exponentialRampToValueAtTime(0.0001, t + 2.3);
+    cry.connect(cryG).connect(out); cry.start(t + 0.1); vib.start(t + 0.1); cry.stop(t + 2.4); vib.stop(t + 2.4);
+  } catch (e) {}
+}
+function dvModo(custom) {
+  $("#death").classList.toggle("custom", custom);
+  $("#dvBase").setAttribute("aria-pressed", String(!custom));
+  $("#dvCustom").setAttribute("aria-pressed", String(custom));
+  $("#dvLbl").textContent = custom ? "Vista previa · con tu imagen, sonido y mensaje" : "Vista previa · así lo ve todo el servidor";
+  dvMostrar();
+}
+$("#dvBase").addEventListener("click", () => dvModo(false));
+$("#dvCustom").addEventListener("click", () => dvModo(true));
+// El botón dice "con sonido": suena aunque los sonidos de XP estén silenciados.
+$("#dvPlay").addEventListener("click", () => { dvMostrar(); dvSonido(); });
 
 /* ---------- metas ---------- */
 const totalMxn = DONACIONES.reduce((s, d) => s + d.monto, 0);
