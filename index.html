@@ -194,6 +194,23 @@ body {
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--ink-soft); font: 18px var(--font-px); }
 .controls .seek { flex: 1; min-width: 60px; height: 6px; background: #22222a; border-radius: 3px; }
 
+/* ---------- rescate (short vertical) ---------- */
+.rescue { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 16px; align-items: center; }
+.rescue .screen { aspect-ratio: 9 / 16; }
+.rescue h3 { margin: 0 0 8px; font: bold 22px var(--font-title); color: var(--mc-red); text-shadow: 0 0 10px rgba(255,85,85,.5); }
+.rescue p { margin: 0 0 10px; max-width: 46ch; }
+
+/* ---------- discord ---------- */
+.msn { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.msn .avatar { width: 56px; height: 56px; border-radius: 8px; display: grid; place-items: center; font-size: 30px;
+  background: linear-gradient(180deg, #7983f5, #5865f2 60%, #3c45a5); border: 2px solid #000; box-shadow: inset 0 0 0 1px #9aa2ff; }
+.msn .txt { flex: 1; min-width: 180px; }
+.msn .txt p { margin: 0 0 4px; }
+.dc { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 8px 18px; border-radius: 4px;
+  border: 1px solid #000; font: bold 15px var(--font-ui); color: #fff; text-shadow: 1px 1px 0 #000;
+  background: linear-gradient(180deg, #8790ff, #5865f2 55%, #3c45a5); box-shadow: inset 0 0 0 1px #aab0ff, 0 0 12px rgba(88,101,242,.5); }
+.dc:hover { filter: brightness(1.15); }
+
 /* ---------- BETA ---------- */
 .dialog { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; }
 .warn-ico {
@@ -416,6 +433,8 @@ a:visited { color: var(--visited); }
   .taskbar { justify-content: space-between; }
   .wizard { grid-template-columns: minmax(0, 1fr); }
   .wizard .side { display: none; }
+  .rescue { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .rescue .screen { max-width: 300px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee span { animation: none; padding-left: 8px; }
@@ -433,6 +452,7 @@ a:visited { color: var(--visited); }
     <a class="icon" href="#que-es"><span class="ico" aria-hidden="true">📄</span><span>Léeme.txt</span></a>
     <a class="icon" href="#donar"><span class="ico" aria-hidden="true">💾</span><span>Donar.exe</span></a>
     <a class="icon" href="#metas"><span class="ico" aria-hidden="true">📊</span><span>Metas.xls</span></a>
+    <a class="icon" href="#discord"><span class="ico" aria-hidden="true">💬</span><span>Discord.lnk</span></a>
   </nav>
 
   <main class="win" aria-label="VOIDSAFIO">
@@ -495,6 +515,25 @@ a:visited { color: var(--visited); }
         </div>
       </section>
 
+      <!-- RESCATE -->
+      <section class="win inner" id="rescate">
+        <div class="bar"><span aria-hidden="true">⚠</span><span class="t">URGENTE — rescate.wmv</span>
+          <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+        <div class="wmp rescue">
+          <div class="screen">
+            <iframe id="ytShort" title="Peña Nieto secuestrado por los voids" loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
+          <div>
+            <h3>¡LOS VOIDS SECUESTRARON A PEÑA NIETO!</h3>
+            <p>Mandaron este video como prueba de vida. Exigen donaciones para soltarlo.</p>
+            <p>Cada peso cuenta para el rescate (y para pagar el servidor).</p>
+            <a class="cta" href="#pagar" data-snd="nuevo">💾 PAGAR EL RESCATE</a>
+          </div>
+        </div>
+      </section>
+
       <!-- DONACIONES -->
       <section class="win donate" id="donar">
         <div class="bar"><span aria-hidden="true">💾</span><span class="t">Donar.exe — Apoya al vacío</span>
@@ -534,7 +573,7 @@ a:visited { color: var(--visited); }
               <ol class="steps">
                 <li>Abre la app de tu banco y haz una <b>transferencia SPEI</b> a esta CLABE (<span id="banco"></span>).</li>
                 <li>En el concepto escribe <b>tu nombre de Minecraft</b>.</li>
-                <li>Mándame la captura por WhatsApp o Discord y te pongo el título en menos de 24 h.</li>
+                <li>Mándame la captura por WhatsApp o por el <a class="dcLink" href="#discord">Discord oficial</a> y te pongo el título en menos de 24 h.</li>
               </ol>
               <div class="copyrow"><code id="clabe"></code><button class="xpbtn" type="button" id="copy">Copiar CLABE</button></div>
               <p class="small">Los títulos se pagan en pesos (MXN); las metas están en dólares (USD). Si no tienes con qué donar, compartir la serie también ayuda.</p>
@@ -548,6 +587,20 @@ a:visited { color: var(--visited); }
         <div class="bar"><span aria-hidden="true">👥</span><span class="t">Libro de donadores</span>
           <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
         <div class="body"><div class="tablebox" id="donors"></div></div>
+      </section>
+
+      <!-- DISCORD -->
+      <section class="win inner" id="discord">
+        <div class="bar"><span aria-hidden="true">💬</span><span class="t">Discord — Servidor oficial de VOIDSAFIO</span>
+          <span class="btns"><button type="button" data-act="min" aria-label="Minimizar">_</button><button type="button" class="x" data-act="close" aria-label="Cerrar">✕</button></span></div>
+        <div class="body msn">
+          <div class="avatar" aria-hidden="true">👁</div>
+          <div class="txt">
+            <p><b>VOIDSAFIO</b> te invitó a unirte a su servidor.</p>
+            <p class="small">Avisos de la temporada, reportes de bugs, clips y comprobantes de donación.</p>
+          </div>
+          <a class="dc" id="dcBtn" href="#" target="_blank" rel="noopener" data-snd="nuevo">💬 Unirme al Discord</a>
+        </div>
       </section>
 
       <hr class="hr">
@@ -588,6 +641,8 @@ a:visited { color: var(--visited); }
    ===================================================================== */
 const CONFIG = {
   youtube: "75ysk6J_gTA",            // id del trailer
+  short: "ovHWo7VvHPY",              // id del short del rescate de Peña Nieto
+  discord: "https://discord.gg/mauWvGp94v",
   lanzamiento: "2026-10-30T18:00:00-06:00",
   dias: 21,
   actualizado: "28 de octubre de 2026",
@@ -695,6 +750,8 @@ document.querySelectorAll(".btns button").forEach((b) => b.addEventListener("cli
 /* ---------- trailer ---------- */
 $("#yt").src = "https://www.youtube-nocookie.com/embed/" + CONFIG.youtube + "?rel=0&modestbranding=1";
 $("#ytLink").href = "https://www.youtube.com/watch?v=" + CONFIG.youtube;
+$("#ytShort").src = "https://www.youtube-nocookie.com/embed/" + CONFIG.short + "?rel=0&modestbranding=1";
+$("#dcBtn").href = CONFIG.discord;
 
 /* ---------- niveles ---------- */
 for (const n of NIVELES) {
